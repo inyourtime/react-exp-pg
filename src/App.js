@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from "react";
 import "./App.css";
 import {
     BrowserRouter as Router,
@@ -13,12 +13,39 @@ import Register from "./components/Register";
 import Login from "./components/Login";
 
 function App() {
-
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isRegister, setIsRegister] = useState(false);
 
-    const setAuth = boolean => {
+    const setAuth = (boolean) => {
         setIsAuthenticated(boolean);
+    };
+
+    const setRegister = (boolean) => {
+        setIsRegister(boolean);
+    };
+
+    async function isAuth() {
+        try {
+            const response = await fetch(
+                "http://localhost:5000/auth/is-verify",
+                {
+                    method: "GET",
+                    headers: { token: localStorage.token },
+                }
+            );
+
+            const parseRes = await response.json();
+            parseRes === true
+                ? setIsAuthenticated(true)
+                : setIsAuthenticated(false);
+        } catch (err) {
+            console.error(err.message);
+        }
     }
+
+    useEffect(() => {
+        isAuth();
+    });
 
     return (
         <Fragment>
@@ -40,8 +67,8 @@ function App() {
                             exact
                             path="/register"
                             render={(props) =>
-                                !isAuthenticated ? (
-                                    <Register {...props} setAuth={setAuth} />
+                                !isRegister ? (
+                                    <Register {...props} setRegister={setRegister} />
                                 ) : (
                                     <Redirect to="/login" />
                                 )
